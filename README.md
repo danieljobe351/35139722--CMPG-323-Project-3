@@ -58,7 +58,7 @@ After deployment, the application will be accessible at the URL provided by Azur
 
 # Azure Deployment
 The application is hosted on Azure and can be accessed at the following URL (replace with your Azure URL):
-- https://telemetryportalmvc20240828094443.azurewebsites.net/
+- https://telemetryportalmvc20240828094443.azurewebsites.net
 
 # Project Structure
 objective
