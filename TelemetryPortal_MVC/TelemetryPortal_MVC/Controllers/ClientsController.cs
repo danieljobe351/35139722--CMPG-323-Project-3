@@ -13,13 +13,13 @@ namespace TelemetryPortal_MVC.Controllers
 {
     public class ClientsController : Controller
     {
-        private readonly TechtrendsContext _context;
+
         private readonly IClientRepository _clientRepository;
 
 
         public ClientsController(TechtrendsContext context, IClientRepository clientRepository)
         {
-            _context = context;
+
             _clientRepository = clientRepository;
         }
 
@@ -32,16 +32,18 @@ namespace TelemetryPortal_MVC.Controllers
         }
 
         // GET: Clients/Details/5
+        // GET: Projects/Details/5
+        [HttpPost, ActionName("Details")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Details(Guid? id)
         {
-            var results = _clientRepository.GetClientByIdAsync(id.Value);
+            var results = await _clientRepository.GetClientByIdAsync(id);
             if (results == null)
             {
                 return NotFound();
             }
 
-            var client = await _context.Clients
-                .FirstOrDefaultAsync(m => m.ClientId == id);
+            var client = _clientRepository.GetClientByIdAsync(id);
             if (client == null)
             {
                 return NotFound();
@@ -49,6 +51,7 @@ namespace TelemetryPortal_MVC.Controllers
 
             return View(client);
         }
+
 
         // GET: Clients/Create
         public IActionResult Create()
@@ -67,7 +70,7 @@ namespace TelemetryPortal_MVC.Controllers
             {
                 client.ClientId = Guid.NewGuid();
                 _clientRepository.CreateClientAsync(client);
-                await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
@@ -106,7 +109,7 @@ namespace TelemetryPortal_MVC.Controllers
                 try
                 {
                     _clientRepository.Update(client);
-                    await _context.SaveChangesAsync();
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -132,13 +135,12 @@ namespace TelemetryPortal_MVC.Controllers
                 return NotFound();
             }
 
-            var client = await _context.Clients
-                .FirstOrDefaultAsync(m => m.ClientId == id);
+            var client = await _clientRepository.GetClientByIdAsync(id);
             if (client == null)
             {
                 return NotFound();
             }
-
+            await _clientRepository.DeleteClientAsync(id);
             return View(client);
         }
 

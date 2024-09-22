@@ -13,23 +13,29 @@ namespace TelemetryPortal_MVC.Controllers
 {
     public class ProjectsController : Controller
     {
-        private readonly TechtrendsContext _context;
+
         private readonly IProjectRepository _projectRepository;
 
         public ProjectsController(TechtrendsContext context, IProjectRepository projectRepository)
         {
-            _context = context;
+
             _projectRepository = projectRepository;
         }
 
         // GET: Projects
         public async Task<IActionResult> Index()
         {
-            var  results = _projectRepository.GetAll();
+            var results = _projectRepository.GetAll();
             return View(results);
+        }
+        public IActionResult Details()
+        {
+            return View();
         }
 
         // GET: Projects/Details/5
+        [HttpPost, ActionName("Details")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -37,8 +43,7 @@ namespace TelemetryPortal_MVC.Controllers
                 return NotFound();
             }
 
-            var project = await _context.Projects
-                .FirstOrDefaultAsync(m => m.ProjectId == id);
+            var project = _projectRepository.GetProjectByIdAsync(id);
             if (project == null)
             {
                 return NotFound();
@@ -46,6 +51,7 @@ namespace TelemetryPortal_MVC.Controllers
 
             return View(project);
         }
+
 
         // GET: Projects/Create
         public IActionResult Create()
@@ -64,7 +70,7 @@ namespace TelemetryPortal_MVC.Controllers
             {
                 project.ProjectId = Guid.NewGuid();
                 _projectRepository.Add(project);
-                
+
                 return RedirectToAction(nameof(Index));
             }
             return View(project);
@@ -103,7 +109,7 @@ namespace TelemetryPortal_MVC.Controllers
                 try
                 {
                     _projectRepository.Update(project);
-                    
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -122,19 +128,19 @@ namespace TelemetryPortal_MVC.Controllers
         }
 
         // GET: Projects/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var project = await _context.Projects
-                .FirstOrDefaultAsync(m => m.ProjectId == id);
+            var project = _projectRepository.GetProjectByIdAsync(id);
             if (project == null)
             {
                 return NotFound();
             }
+            await _projectRepository.DeleteProjectAsync(id);
 
             return View(project);
         }
@@ -150,13 +156,14 @@ namespace TelemetryPortal_MVC.Controllers
                 _projectRepository.Remove(project);
             }
 
-            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProjectExists(Guid id)
         {
-            return _context.Projects.Any(e => e.ProjectId == id);
+
+            return _projectRepository.ProjectExists(id);
         }
     }
 }
